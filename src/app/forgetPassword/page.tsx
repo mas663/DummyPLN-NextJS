@@ -51,14 +51,21 @@ export default function ForgotPasswordPage() {
   // logika Lupa Password
   const props: UploadProps = {
     name: "file",
-    action: "https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload",
+    // action: "https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload",
     headers: {
       authorization: "authorization-text",
     },
+    customRequest: ({ file, onSuccess }) => {
+      setTimeout(() => {
+        // Kita anggap upload selalu berhasil
+        if (onSuccess) {
+          onSuccess("ok"); // Kirim status "ok" ke Ant Design
+        }
+        console.log("Simulasi upload berhasil untuk file:", file);
+      }, 1000); // Tunggu 1 detik untuk simulasi
+    },
+
     onChange(info) {
-      if (info.file.status !== "uploading") {
-        console.log(info.file, info.fileList);
-      }
       if (info.file.status === "done") {
         message.success(`${info.file.name} file uploaded successfully`);
       } else if (info.file.status === "error") {
