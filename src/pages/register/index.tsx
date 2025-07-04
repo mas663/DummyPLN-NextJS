@@ -9,11 +9,10 @@ import {
 } from "@ant-design/icons";
 import type { FormProps } from "antd";
 import NextLink from "next/link";
-import { useState } from "react"; // Diperlukan untuk state loading
+import { useState } from "react";
 
 const { Title, Text } = Typography;
 
-// Mendefinisikan struktur data untuk form registrasi
 type RegisterForm = {
   namaLengkap: string;
   email: string;
@@ -22,23 +21,18 @@ type RegisterForm = {
   confirmPassword?: string;
 };
 
-// Komponen Utama Halaman Registrasi
 export default function RegistrationPage() {
   const [form] = Form.useForm<RegisterForm>();
-  const [loading, setLoading] = useState(false); // State untuk loading button
+  const [loading, setLoading] = useState(false);
 
-  // --- FUNGSI onFinish DIPERBARUI UNTUK MEMANGGIL API ---
   const onFinish: FormProps<RegisterForm>["onFinish"] = async (values) => {
     console.log("Data form yang diterima:", values);
-    setLoading(true); // Mulai loading
+    setLoading(true);
 
-    // --- FIX 1: Menghindari error 'no-unused-vars' dari ESLint ---
-    // Cara ini lebih eksplisit untuk menghapus properti sebelum mengirim ke API
     const apiValues = { ...values };
     delete apiValues.confirmPassword;
 
     try {
-      // Panggil API route lokal Anda
       const response = await fetch("/api/register", {
         method: "POST",
         headers: {
@@ -50,25 +44,19 @@ export default function RegistrationPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        // Jika server mengembalikan error (misal: status 400 atau 500)
-        // Tampilkan pesan error dari server
         throw new Error(result.message || "Gagal melakukan registrasi.");
       }
 
-      // Jika berhasil
       message.success(result.message);
       form.resetFields();
     } catch (error: unknown) {
-      // --- FIX 2: Menggunakan 'unknown' untuk error handling yang lebih aman ---
       console.error("Terjadi kesalahan saat registrasi:", error);
-      // Lakukan type check sebelum mengakses properti 'message'
       let errorMessage = "Terjadi kesalahan. Silakan coba lagi.";
       if (error instanceof Error) {
         errorMessage = error.message;
       }
       message.error(errorMessage);
     } finally {
-      // Pastikan loading selalu berhenti
       setLoading(false);
     }
   };
@@ -190,7 +178,7 @@ export default function RegistrationPage() {
 
           <Text style={{ textAlign: "center" }}>
             Sudah punya akun?{" "}
-            <NextLink href="/login" passHref>
+            <NextLink href="../" passHref>
               Masuk di sini
             </NextLink>
           </Text>

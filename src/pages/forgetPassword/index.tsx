@@ -17,17 +17,14 @@ import { useState } from "react";
 
 const { Title, Text } = Typography;
 
-// --- Mendefinisikan struktur data untuk form ---
 type ForgotPasswordForm = {
   nomor: string;
 };
 
-// --- Komponen Utama Halaman Lupa Password ---
 export default function ForgotPasswordPage() {
   const [form] = Form.useForm<ForgotPasswordForm>();
   const [loading, setLoading] = useState(false);
 
-  // --- Handler untuk submit form (terhubung ke API) ---
   const onFinish: FormProps<ForgotPasswordForm>["onFinish"] = async (
     values
   ) => {
@@ -48,21 +45,18 @@ export default function ForgotPasswordPage() {
       setLoading(false);
     }
   };
-  // logika Lupa Password
   const props: UploadProps = {
     name: "file",
-    // action: "https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload",
     headers: {
       authorization: "authorization-text",
     },
     customRequest: ({ file, onSuccess }) => {
       setTimeout(() => {
-        // Kita anggap upload selalu berhasil
         if (onSuccess) {
-          onSuccess("ok"); // Kirim status "ok" ke Ant Design
+          onSuccess("ok");
         }
         console.log("Simulasi upload berhasil untuk file:", file);
-      }, 1000); // Tunggu 1 detik untuk simulasi
+      }, 1000);
     },
 
     onChange(info) {
@@ -128,10 +122,7 @@ export default function ForgotPasswordPage() {
           </Form>
 
           <Text style={{ textAlign: "center" }}>
-            Back to{" "}
-            <NextLink href="/login" passHref legacyBehavior>
-              Login
-            </NextLink>
+            Back to <NextLink href="../">Login</NextLink>
           </Text>
         </Space>
       </Card>

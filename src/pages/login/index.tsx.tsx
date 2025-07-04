@@ -11,27 +11,35 @@ import {
   Space,
 } from "antd";
 import { PhoneOutlined, LockOutlined } from "@ant-design/icons";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const { Title, Text, Link } = Typography;
 
-// --- Define the data structure for the form ---
 type LoginForm = {
   nomor: string;
   password: string;
   remember?: boolean;
 };
 
-// --- Main Login Page Component ---
 export default function LoginPage() {
   const [form] = Form.useForm<LoginForm>();
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  // --- Handler for form submission ---
   const onFinish = (values: LoginForm) => {
     console.log("Login Data Submitted:", values);
-    message.success("Login successful! (Frontend simulation)");
+    setLoading(true);
+
+    setTimeout(() => {
+      message.success("Login successful! Redirecting...");
+
+      setLoading(false);
+
+      router.push("/dashboard");
+    }, 1500);
   };
 
-  // --- Handler for submission errors ---
   const onFinishFailed = () => {
     message.error("Please fill in all required fields.");
   };
@@ -108,7 +116,8 @@ export default function LoginPage() {
 
             {/* --- Submit Button --- */}
             <Form.Item>
-              <Button type="primary" htmlType="submit" block>
+              {/* 4. Tambahkan prop loading ke tombol */}
+              <Button type="primary" htmlType="submit" block loading={loading}>
                 Log In
               </Button>
             </Form.Item>
