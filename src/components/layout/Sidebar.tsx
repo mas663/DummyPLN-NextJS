@@ -16,9 +16,9 @@ const { Sider } = Layout;
 
 const menuItems = [
   {
-    key: "/dashboard",
+    key: "/home",
     icon: <HomeOutlined />,
-    label: <Link href="/dashboard">Home</Link>,
+    label: <Link href="/home">Home</Link>,
   },
   {
     key: "/data-dashboard",
