@@ -1,4 +1,4 @@
-import LoginPage from "@/pages/login/index.tsx";
+import LoginPage from "@/pages/login";
 
 export default function Home() {
   return <LoginPage />;
