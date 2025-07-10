@@ -26,28 +26,46 @@ export default function RegistrationPage() {
   const [loading, setLoading] = useState(false);
 
   const onFinish: FormProps<RegisterForm>["onFinish"] = async (values) => {
-    console.log("Data form yang diterima:", values);
+    console.log("Data form asli yang diterima:", values);
     setLoading(true);
 
-    const apiValues = { ...values };
-    delete apiValues.confirmPassword;
+    const nameParts = values.namaLengkap.trim().split(" ");
+    const firstName = nameParts[0];
+    const lastName = nameParts.slice(1).join(" ") || firstName;
+
+    const apiPayload = {
+      firstName: firstName,
+      lastName: lastName,
+      username: values.email.split("@")[0],
+      email: values.email,
+      password: values.password,
+    };
+
+    console.log("Data yang akan dikirim ke API dummyjson:", apiPayload);
 
     try {
-      const response = await fetch("/api/register", {
+      const response = await fetch("https://dummyjson.com/users/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(apiValues),
+        body: JSON.stringify(apiPayload),
       });
 
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || "Gagal melakukan registrasi.");
+        if (result.id) {
+          console.log("Registrasi berhasil (disimulasikan):", result);
+          message.success(`Registrasi untuk ${result.firstName} berhasil!`);
+        } else {
+          throw new Error(result.message || "Gagal melakukan registrasi.");
+        }
+      } else {
+        console.log("Registrasi berhasil:", result);
+        message.success(`Registrasi untuk ${result.firstName} berhasil!`);
       }
 
-      message.success(result.message);
       form.resetFields();
     } catch (error: unknown) {
       console.error("Terjadi kesalahan saat registrasi:", error);
@@ -95,7 +113,6 @@ export default function RegistrationPage() {
             onFinishFailed={onFinishFailed}
             size="large"
           >
-            {/* ... Form.Item lainnya tidak berubah ... */}
             <Form.Item
               name="namaLengkap"
               rules={[

@@ -10,14 +10,15 @@ import {
   Card,
   Space,
 } from "antd";
-import { PhoneOutlined, LockOutlined } from "@ant-design/icons";
+import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import NextLink from "next/link";
 
-const { Title, Text, Link } = Typography;
+const { Title, Text } = Typography;
 
 type LoginForm = {
-  nomor: string;
+  username: string;
   password: string;
   remember?: boolean;
 };
@@ -27,21 +28,53 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const onFinish = (values: LoginForm) => {
-    console.log("Login Data Submitted:", values);
+  const onFinish = async (values: LoginForm) => {
     setLoading(true);
+    console.log("Mencoba login dengan data:", values);
 
-    setTimeout(() => {
-      message.success("Login successful! Redirecting...");
+    try {
+      const response = await fetch("https://dummyjson.com/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: values.username,
+          password: values.password,
+        }),
+      });
 
-      setLoading(false);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Login gagal.");
+      }
+
+      message.success("Login berhasil!");
+
+      localStorage.setItem("authToken", data.token);
+      localStorage.setItem(
+        "userData",
+        JSON.stringify({
+          id: data.id,
+          username: data.username,
+          email: data.email,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          image: data.image,
+        })
+      );
 
       router.push("/home");
-    }, 1500);
+    } catch (error: unknown) {
+      console.error("Terjadi kesalahan:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Gagal terhubung ke server.";
+      message.error(errorMessage);
+      setLoading(false);
+    }
   };
 
   const onFinishFailed = () => {
-    message.error("Please fill in all required fields.");
+    message.error("Harap isi semua kolom yang diperlukan.");
   };
 
   return (
@@ -57,9 +90,9 @@ export default function LoginPage() {
       <Card style={{ width: 400, boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)" }}>
         <Space direction="vertical" size="middle" style={{ display: "flex" }}>
           <div style={{ textAlign: "center" }}>
-            <Title level={2}>Welcome Back!</Title>
+            <Title level={2}>Selamat Datang!</Title>
             <Text type="secondary">
-              Please enter your credentials to log in.
+              Silakan masukkan kredensial Anda untuk masuk.
             </Text>
           </div>
 
@@ -71,34 +104,27 @@ export default function LoginPage() {
             initialValues={{ remember: true }}
             size="large"
           >
-            {/* --- Number Input --- */}
             <Form.Item
-              name="nomor"
+              name="username"
               rules={[
-                { required: true, message: "Please input your Number Phone!" },
-                {
-                  pattern: /^[0-9]+$/,
-                  message: "The input is not a valid Number Phone",
-                },
+                { required: true, message: "Harap masukkan username Anda!" },
               ]}
             >
-              <Input prefix={<PhoneOutlined />} placeholder="Nomor Handphone" />
+              <Input prefix={<UserOutlined />} placeholder="emilys" />
             </Form.Item>
 
-            {/* --- Password Input --- */}
             <Form.Item
               name="password"
               rules={[
-                { required: true, message: "Please input your Password!" },
+                { required: true, message: "Harap masukkan Password Anda!" },
               ]}
             >
               <Input.Password
                 prefix={<LockOutlined />}
-                placeholder="Password"
+                placeholder="emilyspass"
               />
             </Form.Item>
 
-            {/* --- Remember Me & Forgot Password --- */}
             <Form.Item>
               <div
                 style={{
@@ -108,24 +134,22 @@ export default function LoginPage() {
                 }}
               >
                 <Form.Item name="remember" valuePropName="checked" noStyle>
-                  <Checkbox>Remember me</Checkbox>
+                  <Checkbox>Ingat saya</Checkbox>
                 </Form.Item>
-                <Link href="/forgetPassword">Forgot password?</Link>
+                <NextLink href="/forgetPassword">Lupa password?</NextLink>
               </div>
             </Form.Item>
 
-            {/* --- Submit Button --- */}
             <Form.Item>
-              {/* 4. Tambahkan prop loading ke tombol */}
               <Button type="primary" htmlType="submit" block loading={loading}>
-                Log In
+                Masuk
               </Button>
             </Form.Item>
           </Form>
 
           <Text style={{ textAlign: "center" }}>
-            Don&apos;t have an account?{" "}
-            <Link href="/register">Sign up now</Link>
+            Belum punya akun?{" "}
+            <NextLink href="/register">Daftar sekarang</NextLink>
           </Text>
         </Space>
       </Card>

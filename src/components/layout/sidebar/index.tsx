@@ -7,6 +7,7 @@ import {
   DashboardOutlined,
   UserOutlined,
   BarChartOutlined,
+  ShopOutlined,
 } from "@ant-design/icons";
 import Image from "next/image";
 import Link from "next/link";
@@ -32,9 +33,14 @@ const menuItems = [
     label: <Link href="/hc-analytics-ai">HC Analytics AI</Link>,
   },
   {
-    key: "/profil",
+    key: "/products",
+    icon: <ShopOutlined />,
+    label: <Link href="/products">products</Link>,
+  },
+  {
+    key: "/profile",
     icon: <UserOutlined />,
-    label: <Link href="/profil">Profile</Link>,
+    label: <Link href="/profile">Profile</Link>,
   },
 ];
 

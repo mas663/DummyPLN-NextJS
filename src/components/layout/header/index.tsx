@@ -1,17 +1,24 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Layout, Avatar, Badge, Space, Popover } from "antd";
 import {
   UserOutlined,
   BellOutlined,
   CalendarOutlined,
 } from "@ant-design/icons";
-import Link from "next/link";
 import Notifications from "@/components/ui/notifications";
 import CalendarPopover from "@/components/ui/calendar";
+import ProfilePopover from "@/components/ui/profil";
 
 const { Header } = Layout;
+
+const userProfile = {
+  name: "Ahmad Wijaya",
+  employeeId: "EMP001",
+  role: "HR Manager",
+  avatarUrl: "https://i.pravatar.cc/150?u=ahmadwijaya",
+};
 
 type AppHeaderProps = {
   siderWidth: number;
@@ -28,6 +35,7 @@ const AppHeader = ({
   calendarVisible,
   setCalendarVisible,
 }: AppHeaderProps) => {
+  const [profileVisible, setProfileVisible] = useState(false);
   return (
     <Header
       style={{
@@ -67,9 +75,27 @@ const AppHeader = ({
         >
           <CalendarOutlined style={{ fontSize: "18px", cursor: "pointer" }} />
         </Popover>
-        <Link href="/profile">
-          <Avatar icon={<UserOutlined />} />
-        </Link>
+        <Popover
+          content={
+            <ProfilePopover
+              name={userProfile.name}
+              role={userProfile.role}
+              employeeId={userProfile.employeeId}
+              avatarUrl={userProfile.avatarUrl}
+              onClose={() => setProfileVisible(false)}
+            />
+          }
+          trigger="click"
+          open={profileVisible}
+          onOpenChange={setProfileVisible}
+          placement="bottomRight"
+        >
+          <Avatar
+            icon={<UserOutlined />}
+            src={userProfile.avatarUrl}
+            style={{ cursor: "pointer" }}
+          />
+        </Popover>
       </Space>
     </Header>
   );
