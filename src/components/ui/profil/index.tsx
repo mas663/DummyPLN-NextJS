@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Avatar, Button, Space, Typography, Divider, Tag } from "antd";
+import { Avatar, Button, Space, Typography, Divider, Tag, message } from "antd";
 import {
   UserOutlined,
   LogoutOutlined,
@@ -30,7 +30,11 @@ const ProfilePopover = ({
   const router = useRouter();
 
   const handleLogout = () => {
-    console.log("Logout clicked!");
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userData");
+
+    message.success("Anda telah berhasil logout.");
+
     onClose();
     router.push("/");
   };

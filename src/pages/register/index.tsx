@@ -10,6 +10,7 @@ import {
 import type { FormProps } from "antd";
 import NextLink from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const { Title, Text } = Typography;
 
@@ -24,57 +25,38 @@ type RegisterForm = {
 export default function RegistrationPage() {
   const [form] = Form.useForm<RegisterForm>();
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const onFinish: FormProps<RegisterForm>["onFinish"] = async (values) => {
-    console.log("Data form asli yang diterima:", values);
     setLoading(true);
+    console.log("Data form yang diterima:", values);
 
-    const nameParts = values.namaLengkap.trim().split(" ");
-    const firstName = nameParts[0];
-    const lastName = nameParts.slice(1).join(" ") || firstName;
-
-    const apiPayload = {
-      firstName: firstName,
-      lastName: lastName,
-      username: values.email.split("@")[0],
-      email: values.email,
-      password: values.password,
-    };
-
-    console.log("Data yang akan dikirim ke API dummyjson:", apiPayload);
+    const apiPayload = { ...values };
+    delete apiPayload.confirmPassword;
 
     try {
-      const response = await fetch("https://dummyjson.com/users/add", {
+      const response = await fetch("/api/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(apiPayload),
       });
 
-      const result = await response.json();
+      const data = await response.json();
 
       if (!response.ok) {
-        if (result.id) {
-          console.log("Registrasi berhasil (disimulasikan):", result);
-          message.success(`Registrasi untuk ${result.firstName} berhasil!`);
-        } else {
-          throw new Error(result.message || "Gagal melakukan registrasi.");
-        }
-      } else {
-        console.log("Registrasi berhasil:", result);
-        message.success(`Registrasi untuk ${result.firstName} berhasil!`);
+        throw new Error(data.message || "Gagal melakukan registrasi.");
       }
 
-      form.resetFields();
+      message.success("Registrasi berhasil! Silakan masuk dengan akun Anda.");
+
+      setTimeout(() => {
+        router.push("/");
+      }, 1500);
     } catch (error: unknown) {
       console.error("Terjadi kesalahan saat registrasi:", error);
-      let errorMessage = "Terjadi kesalahan. Silakan coba lagi.";
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
+      const errorMessage =
+        error instanceof Error ? error.message : "Terjadi kesalahan.";
       message.error(errorMessage);
-    } finally {
       setLoading(false);
     }
   };
@@ -195,7 +177,7 @@ export default function RegistrationPage() {
 
           <Text style={{ textAlign: "center" }}>
             Sudah punya akun?{" "}
-            <NextLink href="../" passHref>
+            <NextLink href="/" passHref>
               Masuk di sini
             </NextLink>
           </Text>

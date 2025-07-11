@@ -33,7 +33,7 @@ export default function LoginPage() {
     console.log("Mencoba login dengan data:", values);
 
     try {
-      const response = await fetch("https://dummyjson.com/auth/login", {
+      const response = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -48,28 +48,23 @@ export default function LoginPage() {
         throw new Error(data.message || "Login gagal.");
       }
 
-      message.success("Login berhasil!");
+      message.success("Login berhasil! Mengalihkan...");
 
       localStorage.setItem("authToken", data.token);
-      localStorage.setItem(
-        "userData",
-        JSON.stringify({
-          id: data.id,
-          username: data.username,
-          email: data.email,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          image: data.image,
-        })
-      );
+      localStorage.setItem("userData", JSON.stringify(data.user));
 
-      router.push("/home");
+      setTimeout(() => {
+        router.push("/home");
+      }, 1000);
     } catch (error: unknown) {
       console.error("Terjadi kesalahan:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Gagal terhubung ke server.";
       message.error(errorMessage);
-      setLoading(false);
+    } finally {
+      if (!localStorage.getItem("authToken")) {
+        setLoading(false);
+      }
     }
   };
 
@@ -110,7 +105,10 @@ export default function LoginPage() {
                 { required: true, message: "Harap masukkan username Anda!" },
               ]}
             >
-              <Input prefix={<UserOutlined />} placeholder="emilys" />
+              <Input
+                prefix={<UserOutlined />}
+                placeholder="Username (cth: emilys)"
+              />
             </Form.Item>
 
             <Form.Item
@@ -121,7 +119,7 @@ export default function LoginPage() {
             >
               <Input.Password
                 prefix={<LockOutlined />}
-                placeholder="emilyspass"
+                placeholder="Password (cth: emilyspass)"
               />
             </Form.Item>
 

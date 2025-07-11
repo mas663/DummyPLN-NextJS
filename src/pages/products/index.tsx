@@ -13,6 +13,7 @@ import {
   Typography,
 } from "antd";
 import MainLayout from "@/components/layout/MainLayout";
+import api from "@/lib/api";
 
 const { Title } = Typography;
 
@@ -28,70 +29,53 @@ export default function ProductsPage() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [form] = Form.useForm();
 
-  // --- READ: Mengambil data produk saat komponen dimuat ---
+  const fetchProducts = async () => {
+    try {
+      const response = await api.get("https://dummyjson.com/products");
+      setProducts(response.data.products);
+    } catch (error) {
+      console.error("Gagal mengambil produk:", error);
+      message.error("Gagal memuat data produk.");
+    }
+  };
+
   useEffect(() => {
-    fetch("https://dummyjson.com/products")
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Data produk awal berhasil diambil:", data.products);
-        setProducts(data.products);
-      });
+    fetchProducts();
   }, []);
 
-  // --- CREATE: Menambahkan produk baru ---
   const addProduct = async (values: { title: string; price: number }) => {
-    console.log("Mencoba menambahkan produk dengan data:", values);
-    const res = await fetch("https://dummyjson.com/products/add", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    });
-
-    if (res.ok) {
-      const result = await res.json();
-      console.log("Respons API (Add):", result);
-
-      const newProduct = { ...values, id: result.id };
-      setProducts([newProduct, ...products]);
-      message.success(`Produk "${values.title}" berhasil ditambahkan.`);
+    try {
+      const response = await api.post(
+        "https://dummyjson.com/products/add",
+        values
+      );
+      message.success(`Produk "${response.data.title}" berhasil ditambahkan.`);
+      fetchProducts();
       return true;
-    } else {
+    } catch (error) {
+      console.error("Gagal menambahkan produk:", error);
       message.error("Gagal menambahkan produk.");
-      console.error("Gagal menambahkan produk. Status:", res.status);
       return false;
     }
   };
 
-  // --- UPDATE: Mengedit produk yang ada ---
   const updateProduct = async (
     id: number,
     values: { title: string; price: number }
   ) => {
-    console.log(`Mencoba update produk ID: ${id} dengan data:`, values);
-    const res = await fetch(`https://dummyjson.com/products/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    });
-
-    if (res.ok) {
-      const updatedProduct = await res.json();
-      console.log("Respons API (Update):", updatedProduct);
-
-      setProducts(
-        products.map((p) => (p.id === id ? { ...p, ...updatedProduct } : p))
-      );
+    try {
+      await api.put(`https://dummyjson.com/products/${id}`, values);
       message.success(`Produk ID ${id} berhasil diperbarui.`);
+      fetchProducts();
       return true;
-    } else {
+    } catch (error) {
+      console.error("Gagal memperbarui produk:", error);
       message.error("Gagal memperbarui produk.");
-      console.error(`Gagal update produk ID: ${id}. Status:`, res.status);
       return false;
     }
   };
 
-  // --- DELETE: Menghapus produk ---
-  const deleteProduct = async (id: number) => {
+  const deleteProduct = (id: number) => {
     Modal.confirm({
       title: "Anda yakin ingin menghapus produk ini?",
       content: "Tindakan ini tidak dapat dibatalkan.",
@@ -99,23 +83,13 @@ export default function ProductsPage() {
       okType: "danger",
       cancelText: "Batal",
       onOk: async () => {
-        console.log(`Mencoba menghapus produk ID: ${id}`);
-        const res = await fetch(`https://dummyjson.com/products/${id}`, {
-          method: "DELETE",
-        });
-
-        if (res.ok) {
-          const result = await res.json();
-          console.log("Respons API (Delete):", result);
-
-          setProducts(products.filter((p) => p.id !== id));
+        try {
+          await api.delete(`https://dummyjson.com/products/${id}`);
           message.success(`Produk ID ${id} berhasil dihapus.`);
-        } else {
+          fetchProducts();
+        } catch (error) {
+          console.error("Gagal menghapus produk:", error);
           message.error("Gagal menghapus produk.");
-          console.error(
-            `Gagal menghapus produk ID: ${id}. Status:`,
-            res.status
-          );
         }
       },
     });
