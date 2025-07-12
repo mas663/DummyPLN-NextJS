@@ -23,14 +23,14 @@ const menuItems = [
     label: <Link href="/home">Home</Link>,
   },
   {
-    key: "/data-dashboard",
+    key: "/dataDashboard",
     icon: <DashboardOutlined />,
-    label: <Link href="/data-dashboard">Data Dashboard</Link>,
+    label: <Link href="/dataDashboard">Data Dashboard</Link>,
   },
   {
-    key: "/hc-analytics-ai",
+    key: "/hcAnalyticsAi",
     icon: <BarChartOutlined />,
-    label: <Link href="/hc-analytics-ai">HC Analytics AI</Link>,
+    label: <Link href="/hcAnalyticsAi">HC Analytics AI</Link>,
   },
   {
     key: "/products",
