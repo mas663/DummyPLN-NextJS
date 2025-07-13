@@ -7,6 +7,7 @@ import MainLayout from "@/components/layout/MainLayout";
 
 const { Title, Paragraph } = Typography;
 
+// Tipe untuk setiap pesan dalam chat
 type Message = {
   role: "user" | "ai";
   content: string;
@@ -24,6 +25,7 @@ export default function HcAnalyticsAiPage() {
   const [isLoading, setIsLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
+  // Efek untuk auto-scroll ke pesan terbaru
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -34,10 +36,11 @@ export default function HcAnalyticsAiPage() {
     setIsLoading(true);
     setInputValue("");
 
+    // Tambahkan pesan user dan placeholder untuk AI
     const newMessages: Message[] = [
       ...messages,
       { role: "user", content: prompt },
-      { role: "ai", content: "" },
+      { role: "ai", content: "" }, // Placeholder AI
     ];
     setMessages(newMessages);
 
@@ -67,9 +70,10 @@ export default function HcAnalyticsAiPage() {
               setIsLoading(false);
               return;
             }
+            // DIUBAH: Tambahkan spasi setelah setiap kata
             setMessages((prev) => {
               const updatedMessages = [...prev];
-              updatedMessages[updatedMessages.length - 1].content += data;
+              updatedMessages[updatedMessages.length - 1].content += data + " ";
               return updatedMessages;
             });
           }
