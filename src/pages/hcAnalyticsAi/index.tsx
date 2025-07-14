@@ -169,9 +169,6 @@ export default function HcAnalyticsAiPage() {
           marginBottom: "16px",
         }}
       >
-        <Title level={2} style={{ margin: 0 }}>
-          HC Analytics AI
-        </Title>
         <Button
           icon={<HistoryOutlined />}
           onClick={() => setHistoryDrawerVisible(true)}

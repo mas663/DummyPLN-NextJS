@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Layout, Spin } from "antd";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import AppHeader from "@/components/layout/header";
 import Sidebar from "@/components/layout/sidebar";
 import AppFooter from "@/components/layout/footer";
@@ -18,6 +18,8 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const [isVerified, setIsVerified] = useState(false);
 
+  const pathname = usePathname();
+
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (!token) {
@@ -26,6 +28,23 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
       setIsVerified(true);
     }
   }, [router]);
+
+  const getPageTitle = () => {
+    switch (pathname) {
+      case "/home":
+        return "Home";
+      case "/data-dashboard":
+        return "Data Dashboard";
+      case "/hc-analytics-ai":
+        return "HC Analytics AI";
+      case "/products":
+        return "Manajemen Produk";
+      case "/profile":
+        return "Profil Pengguna";
+      default:
+        return "Dashboard";
+    }
+  };
 
   if (!isVerified) {
     return (
@@ -54,6 +73,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
           setNotificationsVisible={setNotificationsVisible}
           calendarVisible={calendarVisible}
           setCalendarVisible={setCalendarVisible}
+          title={getPageTitle()}
         />
         <Content
           style={{

@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { Layout, Avatar, Badge, Space, Popover } from "antd";
+import React, { useEffect, useState } from "react";
+import { Layout, Avatar, Badge, Space, Popover, Typography } from "antd";
 import {
   UserOutlined,
   BellOutlined,
@@ -12,12 +12,12 @@ import CalendarPopover from "@/components/ui/calendar";
 import ProfilePopover from "@/components/ui/profil";
 
 const { Header } = Layout;
+const { Title } = Typography;
 
-const userProfile = {
-  name: "Ahmad Wijaya",
-  employeeId: "EMP001",
-  role: "HR Manager",
-  avatarUrl: "https://i.pravatar.cc/150?u=ahmadwijaya",
+type UserData = {
+  name: string;
+  username: string;
+  image: string;
 };
 
 type AppHeaderProps = {
@@ -26,6 +26,7 @@ type AppHeaderProps = {
   setNotificationsVisible: (visible: boolean) => void;
   calendarVisible: boolean;
   setCalendarVisible: (visible: boolean) => void;
+  title: string;
 };
 
 const AppHeader = ({
@@ -34,8 +35,18 @@ const AppHeader = ({
   setNotificationsVisible,
   calendarVisible,
   setCalendarVisible,
+  title,
 }: AppHeaderProps) => {
   const [profileVisible, setProfileVisible] = useState(false);
+  const [userData, setUserData] = useState<UserData | null>(null);
+
+  useEffect(() => {
+    const storedUserData = localStorage.getItem("userData");
+    if (storedUserData) {
+      setUserData(JSON.parse(storedUserData));
+    }
+  }, []);
+
   return (
     <Header
       style={{
@@ -43,7 +54,7 @@ const AppHeader = ({
         background: "#fff",
         display: "flex",
         alignItems: "center",
-        justifyContent: "flex-end",
+        justifyContent: "space-between",
         borderBottom: "1px solid #f0f0f0",
         position: "fixed",
         top: 0,
@@ -53,6 +64,10 @@ const AppHeader = ({
         transition: "all 0.2s",
       }}
     >
+      <Title level={4} style={{ margin: 0 }}>
+        {title}
+      </Title>
+
       <Space size="large">
         <Popover
           content={<Notifications />}
@@ -66,6 +81,7 @@ const AppHeader = ({
             <BellOutlined style={{ fontSize: "18px", cursor: "pointer" }} />
           </Badge>
         </Popover>
+
         <Popover
           content={<CalendarPopover />}
           trigger="click"
@@ -75,15 +91,18 @@ const AppHeader = ({
         >
           <CalendarOutlined style={{ fontSize: "18px", cursor: "pointer" }} />
         </Popover>
+
         <Popover
           content={
-            <ProfilePopover
-              name={userProfile.name}
-              role={userProfile.role}
-              employeeId={userProfile.employeeId}
-              avatarUrl={userProfile.avatarUrl}
-              onClose={() => setProfileVisible(false)}
-            />
+            userData ? (
+              <ProfilePopover
+                name={userData.name}
+                role="User"
+                employeeId={userData.username}
+                avatarUrl={userData.image}
+                onClose={() => setProfileVisible(false)}
+              />
+            ) : null
           }
           trigger="click"
           open={profileVisible}
@@ -92,7 +111,7 @@ const AppHeader = ({
         >
           <Avatar
             icon={<UserOutlined />}
-            src={userProfile.avatarUrl}
+            src={userData?.image}
             style={{ cursor: "pointer" }}
           />
         </Popover>

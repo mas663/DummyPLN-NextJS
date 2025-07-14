@@ -10,12 +10,9 @@ import {
   Input,
   InputNumber,
   Space,
-  Typography,
 } from "antd";
 import MainLayout from "@/components/layout/MainLayout";
 import api from "@/lib/api";
-
-const { Title } = Typography;
 
 type Product = {
   id: number;
@@ -173,18 +170,14 @@ export default function ProductsPage() {
           <div
             style={{
               display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
+              justifyContent: "flex-end",
+              marginBottom: "16px",
             }}
           >
-            <Title level={2} style={{ marginBottom: 0 }}>
-              Manajemen Produk
-            </Title>
             <Button type="primary" onClick={() => showModal()}>
               Tambah Produk
             </Button>
           </div>
-
           <Table
             dataSource={products}
             columns={columns}

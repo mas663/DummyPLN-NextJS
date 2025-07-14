@@ -1,4 +1,3 @@
-// src/pages/profile.tsx
 import React from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import {
@@ -25,7 +24,6 @@ import {
 
 const { Title, Text } = Typography;
 
-// --- Data Profil (Simulasi Backend) ---
 const userProfile = {
   name: "Ahmad Wijaya",
   employeeId: "EMP001",
@@ -39,7 +37,6 @@ const userProfile = {
   manager: "Sarah Abdullah",
 };
 
-// --- Komponen kecil untuk menampilkan satu item informasi ---
 const InfoItem = ({
   icon,
   label,
@@ -63,22 +60,18 @@ const InfoItem = ({
   </div>
 );
 
-// --- Komponen Halaman Profil ---
 const ProfilePage = () => {
   return (
     <MainLayout>
-      {/* Judul Halaman */}
       <div style={{ marginBottom: "24px" }}>
         <Title level={2}>User Profile</Title>
         <Text type="secondary">Kelola informasi profil Anda</Text>
       </div>
 
-      {/* Kartu Profil Utama */}
       <Card
         bordered={false}
         style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }}
       >
-        {/* Bagian Header Profil */}
         <div
           style={{
             display: "flex",
@@ -112,10 +105,6 @@ const ProfilePage = () => {
 
         <Divider />
 
-        {/* Bagian Detail Informasi */}
-        <Title level={5} style={{ marginBottom: "24px" }}>
-          Informasi Personal
-        </Title>
         <Row gutter={[32, 24]}>
           <Col xs={24} sm={12} md={8}>
             <InfoItem

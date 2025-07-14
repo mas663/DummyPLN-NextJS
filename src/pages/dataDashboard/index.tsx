@@ -23,7 +23,6 @@ import {
 
 const { Title, Text, Paragraph } = Typography;
 
-// --- Komponen untuk Kartu Statistik (Bagian Atas) ---
 const StatisticCards = () => (
   <Row gutter={[16, 16]}>
     <Col xs={24} sm={12} md={6}>
@@ -125,7 +124,6 @@ const StatisticCards = () => (
   </Row>
 );
 
-// --- Data & Komponen untuk Kartu Aktivitas (Kiri Bawah) ---
 const activityData = [
   {
     title: "Evaluasi Bulanan",
@@ -188,7 +186,6 @@ const ActivityCard = () => (
   </Card>
 );
 
-// --- Komponen untuk Kartu Aksi Cepat (Kanan Bawah) ---
 const QuickActionsCard = () => (
   <Card bordered={false}>
     <Title level={4}>Aksi Cepat</Title>
@@ -214,7 +211,6 @@ const QuickActionsCard = () => (
   </Card>
 );
 
-// --- Komponen untuk Kartu Optimalisasi (Paling Bawah) ---
 const OptimizationCard = () => (
   <Card
     style={{
@@ -234,7 +230,6 @@ const OptimizationCard = () => (
         </Paragraph>
       </Col>
       <Col xs={0} md={8} style={{ textAlign: "right" }}>
-        {/* Ganti dengan gambar atau ikon yang lebih relevan */}
         <UserOutlined
           style={{ fontSize: "80px", color: "rgba(255, 255, 255, 0.3)" }}
         />
@@ -243,23 +238,18 @@ const OptimizationCard = () => (
   </Card>
 );
 
-// --- Halaman Dashboard Utama ---
 const DashboardPage = () => {
   return (
     <MainLayout>
       <Space direction="vertical" size="large" style={{ display: "flex" }}>
-        {/* Judul Dashboard */}
         <div>
-          <Title level={2}>Dashboard</Title>
           <Text type="secondary">
             Selamat datang kembali! Berikut ringkasan data SDM hari ini.
           </Text>
         </div>
 
-        {/* Kartu Statistik */}
         <StatisticCards />
 
-        {/* Kartu Aktivitas dan Aksi Cepat */}
         <Row gutter={[16, 16]}>
           <Col xs={24} lg={16}>
             <ActivityCard />
@@ -269,7 +259,6 @@ const DashboardPage = () => {
           </Col>
         </Row>
 
-        {/* Kartu Optimalisasi */}
         <OptimizationCard />
       </Space>
     </MainLayout>

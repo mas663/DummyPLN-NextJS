@@ -2,12 +2,11 @@ import React from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { Typography } from "antd";
 
-const { Title, Paragraph } = Typography;
+const { Paragraph } = Typography;
 
 const DashboardPage = () => {
   return (
     <MainLayout>
-      <Title level={2}>Selamat Datang di Page Home</Title>
       <Paragraph>
         Ini adalah halaman utama setelah login. Konten ini ditampilkan di dalam
         layout utama yang memiliki Sidebar dan Header.

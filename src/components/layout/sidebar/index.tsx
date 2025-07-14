@@ -5,7 +5,6 @@ import { Layout, Menu, Typography } from "antd";
 import {
   HomeOutlined,
   DashboardOutlined,
-  UserOutlined,
   BarChartOutlined,
   ShopOutlined,
 } from "@ant-design/icons";
@@ -36,11 +35,6 @@ const menuItems = [
     key: "/products",
     icon: <ShopOutlined />,
     label: <Link href="/products">products</Link>,
-  },
-  {
-    key: "/profile",
-    icon: <UserOutlined />,
-    label: <Link href="/profile">Profile</Link>,
   },
 ];
 
