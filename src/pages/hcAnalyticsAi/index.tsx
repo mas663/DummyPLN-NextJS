@@ -1,17 +1,18 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Button, Card, Typography, Space, Spin, Input, Avatar } from "antd";
-import { SendOutlined, UserOutlined, RobotOutlined } from "@ant-design/icons";
+import { Button, Typography, Spin, Input, Avatar } from "antd";
+import {
+  SendOutlined,
+  UserOutlined,
+  RobotOutlined,
+  HistoryOutlined,
+} from "@ant-design/icons";
 import MainLayout from "@/components/layout/MainLayout";
+import ChatHistoryDrawer from "@/components/ui/chatHistory";
+import { Message, Chat } from "@/types/chat";
 
 const { Title, Paragraph } = Typography;
-
-// Tipe untuk setiap pesan dalam chat
-type Message = {
-  role: "user" | "ai";
-  content: string;
-};
 
 const templatePrompts = [
   "Berikan ringkasan kinerja karyawan bulan ini.",
@@ -23,12 +24,46 @@ export default function HcAnalyticsAiPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [chatHistory, setChatHistory] = useState<Chat[]>([]);
+  const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const [historyDrawerVisible, setHistoryDrawerVisible] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Efek untuk auto-scroll ke pesan terbaru
+  useEffect(() => {
+    const savedHistory = localStorage.getItem("chatHistory");
+    if (savedHistory) {
+      setChatHistory(JSON.parse(savedHistory));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (chatHistory.length > 0 || localStorage.getItem("chatHistory")) {
+      localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+    }
+  }, [chatHistory]);
+
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const updateHistory = (chatId: string, newMessages: Message[]) => {
+    const existingChatIndex = chatHistory.findIndex(
+      (chat) => chat.id === chatId
+    );
+    let updatedHistory = [...chatHistory];
+
+    if (existingChatIndex !== -1) {
+      updatedHistory[existingChatIndex].messages = newMessages;
+    } else {
+      const newChat: Chat = {
+        id: chatId,
+        title: newMessages[0].content.substring(0, 40) + "...",
+        messages: newMessages,
+      };
+      updatedHistory = [newChat, ...updatedHistory];
+    }
+    setChatHistory(updatedHistory);
+  };
 
   const handleSendMessage = async (prompt: string) => {
     if (!prompt || isLoading) return;
@@ -36,12 +71,18 @@ export default function HcAnalyticsAiPage() {
     setIsLoading(true);
     setInputValue("");
 
-    // Tambahkan pesan user dan placeholder untuk AI
-    const newMessages: Message[] = [
-      ...messages,
-      { role: "user", content: prompt },
-      { role: "ai", content: "" }, // Placeholder AI
-    ];
+    const userMessage: Message = { role: "user", content: prompt };
+    let currentChatId = activeChatId;
+    const newMessages = [...messages, userMessage];
+
+    if (!currentChatId) {
+      currentChatId = Date.now().toString();
+      setActiveChatId(currentChatId);
+      updateHistory(currentChatId, [userMessage]);
+    } else {
+      updateHistory(currentChatId, newMessages);
+    }
+
     setMessages(newMessages);
 
     try {
@@ -55,6 +96,10 @@ export default function HcAnalyticsAiPage() {
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
+      let aiFullResponse = "";
+
+      const aiPlaceholder: Message = { role: "ai", content: "" };
+      setMessages([...newMessages, aiPlaceholder]);
 
       while (true) {
         const { value, done } = await reader.read();
@@ -67,56 +112,94 @@ export default function HcAnalyticsAiPage() {
           if (line.startsWith("data: ")) {
             const data = line.substring(6).trim();
             if (data === "[DONE]") {
+              const finalAiMessage: Message = {
+                role: "ai",
+                content: aiFullResponse,
+              };
+              updateHistory(currentChatId, [...newMessages, finalAiMessage]);
               setIsLoading(false);
               return;
             }
-            // DIUBAH: Tambahkan spasi setelah setiap kata
+            aiFullResponse += data + " ";
             setMessages((prev) => {
-              const updatedMessages = [...prev];
-              updatedMessages[updatedMessages.length - 1].content += data + " ";
-              return updatedMessages;
+              const updatedMsgs = [...prev];
+              updatedMsgs[updatedMsgs.length - 1].content = aiFullResponse;
+              return updatedMsgs;
             });
           }
         }
       }
     } catch (error) {
       console.error("Streaming error:", error);
-      setMessages((prev) => {
-        const updatedMessages = [...prev];
-        updatedMessages[updatedMessages.length - 1].content =
-          "Terjadi kesalahan saat mengambil data.";
-        return updatedMessages;
-      });
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleLoadChat = (chatId: string) => {
+    const chat = chatHistory.find((c) => c.id === chatId);
+    if (chat) {
+      setActiveChatId(chat.id);
+      setMessages(chat.messages);
+      setHistoryDrawerVisible(false);
+    }
+  };
+
+  const handleNewChat = () => {
+    setActiveChatId(null);
+    setMessages([]);
+    setHistoryDrawerVisible(false);
+  };
+
+  const handleDeleteChat = (chatId: string) => {
+    const updatedHistory = chatHistory.filter((c) => c.id !== chatId);
+    setChatHistory(updatedHistory);
+    if (activeChatId === chatId) {
+      handleNewChat();
+    }
+  };
+
   return (
     <MainLayout>
-      <Title level={2}>HC Analytics AI</Title>
-      <Paragraph type="secondary">
-        Ajukan pertanyaan atau pilih dari template di bawah untuk memulai
-        percakapan dengan AI.
-      </Paragraph>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "16px",
+        }}
+      >
+        <Title level={2} style={{ margin: 0 }}>
+          HC Analytics AI
+        </Title>
+        <Button
+          icon={<HistoryOutlined />}
+          onClick={() => setHistoryDrawerVisible(true)}
+        >
+          Riwayat
+        </Button>
+      </div>
 
       <div className="chat-container">
         <div className="chat-messages">
           {messages.length === 0 && !isLoading ? (
-            <Card>
-              <Title level={4}>Contoh Pertanyaan</Title>
-              <Space direction="vertical" style={{ width: "100%" }}>
+            <div className="welcome-screen">
+              <Title level={3}>Mulai Percakapan</Title>
+              <Paragraph type="secondary">
+                Ajukan pertanyaan atau pilih dari template di bawah.
+              </Paragraph>
+              <div className="template-prompts">
                 {templatePrompts.map((prompt, index) => (
                   <Button
                     key={index}
-                    block
+                    className="prompt-button"
                     onClick={() => handleSendMessage(prompt)}
                   >
                     {prompt}
                   </Button>
                 ))}
-              </Space>
-            </Card>
+              </div>
+            </div>
           ) : (
             messages.map((msg, index) => (
               <div key={index} className={`message ${msg.role}`}>
@@ -127,7 +210,7 @@ export default function HcAnalyticsAiPage() {
                   className="avatar"
                 />
                 <div className="message-content">
-                  <Paragraph style={{ whiteSpace: "pre-wrap" }}>
+                  <Paragraph style={{ whiteSpace: "pre-wrap", margin: 0 }}>
                     {msg.content}
                     {isLoading && index === messages.length - 1 && (
                       <span className="blinking-cursor">▋</span>
@@ -164,18 +247,45 @@ export default function HcAnalyticsAiPage() {
         </div>
       </div>
 
+      <ChatHistoryDrawer
+        visible={historyDrawerVisible}
+        onClose={() => setHistoryDrawerVisible(false)}
+        history={chatHistory}
+        onLoadChat={handleLoadChat}
+        onNewChat={handleNewChat}
+        onDeleteChat={handleDeleteChat}
+      />
+
       <style jsx global>{`
         .chat-container {
           display: flex;
           flex-direction: column;
-          height: calc(100vh - 280px);
+          height: calc(100vh - 250px);
           border: 1px solid #f0f0f0;
           border-radius: 8px;
+          background: #fff;
         }
         .chat-messages {
           flex-grow: 1;
           overflow-y: auto;
           padding: 24px;
+        }
+        .welcome-screen {
+          text-align: center;
+          padding-top: 50px;
+        }
+        .template-prompts {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          max-width: 500px;
+          margin: 24px auto 0;
+        }
+        .prompt-button {
+          text-align: left;
+          height: auto;
+          padding: 12px 16px;
+          white-space: normal;
         }
         .message {
           display: flex;
@@ -186,19 +296,20 @@ export default function HcAnalyticsAiPage() {
           justify-content: flex-end;
         }
         .message.user .message-content {
-          background-color: #e6f7ff;
-          border-radius: 12px 12px 0 12px;
+          background-color: #1677ff;
+          color: white;
+          border-radius: 18px 18px 4px 18px;
         }
         .message.ai .message-content {
           background-color: #f5f5f5;
-          border-radius: 12px 12px 12px 0;
+          border-radius: 18px 18px 18px 4px;
         }
         .message.user .avatar {
           order: 2;
         }
         .message-content {
           padding: 12px 16px;
-          max-width: 70%;
+          max-width: 75%;
         }
         .chat-input-area {
           display: flex;
